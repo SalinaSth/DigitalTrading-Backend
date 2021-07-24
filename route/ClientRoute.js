@@ -34,5 +34,34 @@ router.post('/client/register', upload.fields([{ name: 'citizenship', maxCount: 
         });
     });
 });
+//Client login system
+router.post('/client/login', function (req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    Client.findOne({ email: email })
+        .then(function (clientData) {
+            if (clientData === null) {
+                return res.status(403).json({ message: "user not found", success: false });
+            }
+
+            bcryptjs.compare(password, clientData.password, function (err, result) {
+                if (result === false) {
+                    return res.status(403).json({ message: "Invalid login credentials!!", success: false });
+                }
+
+                //token generate
+                const token = jwt.sign({ clientID: clientData._id }, 'Secretkey');
+                res.status(200).json({
+                    token: token,
+                    success: true,
+                    clientData: clientData
+                })
+            })
+        })
+        .catch(function (err) {
+            res.status(500).json({ messsage: err })
+        })
+})
 
 module.exports = router;
