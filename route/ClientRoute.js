@@ -7,17 +7,18 @@ const bcryptjs = require('bcryptjs');
 const auth = require('../middleware/auth');
 
 //register for client
-router.post('/client/register', upload.fields([{ name: 'citizenship', maxCount: 1 }]), function (req, res) {
+router.post('/client/register', upload.fields([{ name: 'citizenship', maxCount: 1 }, { name: 'kyc', maxCount: 1 }]), function (req, res) {
     if (req.files == undefined) {
         return res.status(400).json({ message: "Invalid field format" });
     }
-
+    console.log(req.file)
     const fullname = req.body.fullname;
     const branchName = req.body.branchName;
     const email = req.body.email;
     const password = req.body.password;
     const contact = req.body.contact;
     const citizenship = req.body.citizenship;
+    const kyc = req.body.kyc;
     const clientType = req.body.clientType;
 
     console.log(req.body)
@@ -25,7 +26,7 @@ router.post('/client/register', upload.fields([{ name: 'citizenship', maxCount: 
     bcryptjs.hash(password, 10, function (err, hash) {
         const clientData = new Client({
             fullname: fullname, branchName:branchName, email: email, password: hash, contact: contact, 
-            citizenship: req.files.citizenship[0].filename, clientType: clientType
+            citizenship: req.files.citizenship[0].filename, kyc:req.files.kyc[0].filename, clientType: clientType
         });
         clientData.save().then(function (result) {
             res.status(201).json({ success: true, message: "Client has been successfully registered!!" });
@@ -38,7 +39,7 @@ router.post('/client/register', upload.fields([{ name: 'citizenship', maxCount: 
 router.post('/client/login', function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
-
+    console.log(req.body)
     Client.findOne({ email: email })
         .then(function (clientData) {
             if (clientData === null) {
@@ -54,7 +55,8 @@ router.post('/client/login', function (req, res) {
                 const token = jwt.sign({ clientID: clientData._id }, 'Secretkey');
                 res.status(200).json({
                     token: token,
-                    success: true,
+                    success: true, 
+                    messsage: "Auth success",
                     clientData: clientData
                 })
             })

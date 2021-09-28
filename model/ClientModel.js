@@ -38,6 +38,10 @@ const clientSchema = mongoose.Schema(
         type: String,
         required: true
     },
+    kyc: {
+      type: String,
+      required: true
+    },
     clientType:{
         type: String,
         required: true
